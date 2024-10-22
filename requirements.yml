@@ -1,4 +1,4 @@
-name: siglib
+name: esig-conditional-sig-wasserstein-gans-env
 channels:
   - pytorch
   - conda-forge
