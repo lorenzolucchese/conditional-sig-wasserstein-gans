@@ -114,7 +114,7 @@ def main(args):
         for algo_id in args.algos:
             for seed in range(args.initial_seed, args.initial_seed + args.num_seeds):
                 base_config = BaseConfig(
-                        device='cuda:{}'.format(args.device) if args.use_cuda and torch.cuda.is_available() else 'cpu',
+                    device='cuda:{}'.format(args.device) if args.use_cuda and torch.cuda.is_available() else 'cpu',
                     seed=seed,
                     batch_size=args.batch_size,
                     hidden_dims=args.hidden_dims,

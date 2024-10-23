@@ -4,8 +4,8 @@ import numpy as np
 import torch
 
 
-def sample_indices(dataset_size, batch_size):
-    indices = torch.from_numpy(np.random.choice(dataset_size, size=batch_size, replace=False)).cuda()
+def sample_indices(dataset_size, batch_size, device):
+    indices = torch.from_numpy(np.random.choice(dataset_size, size=batch_size, replace=False)).to(device).long()
     # functions torch.-multinomial and torch.-choice are extremely slow -> back to numpy
     return indices
 
