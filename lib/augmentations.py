@@ -44,7 +44,7 @@ def cat_lags(x: torch.Tensor, m: int) -> torch.Tensor:
     assert q >= m, 'Lift cannot be performed. q < m : (%s < %s)' % (q, m)
     x_lifted = list()
     for i in range(m):
-        x_lifted.append(x[:, i:i + m])
+        x_lifted.append(x[:, i:i + (q - m + 1)])
     return torch.cat(x_lifted, dim=-1)
 
 
