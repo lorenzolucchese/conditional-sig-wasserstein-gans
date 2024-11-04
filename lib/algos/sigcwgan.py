@@ -44,11 +44,11 @@ def calibrate_sigw1_metric(config, x_future, x_past):
     sigs_future = config.compute_sig_future(x_future)
     assert sigs_past.size(0) == sigs_future.size(0)
     X, Y = to_numpy(sigs_past), to_numpy(sigs_future)
-    if isinstance(config, SigCWGANConfig):
+    if type(config) is SigCWGANConfig:
         Z = None
-    elif isinstance(config, MSigCWGANConfig):
-        sigs_future_control = config.compute_sig_future_control(x_future)
-        Z = to_numpy(sigs_future_control)
+    elif type(config) is MSigCWGANConfig:
+        sigs_control_future = config.compute_sig_control_future(x_future)
+        Z = to_numpy(sigs_control_future)
     lm = fit_controlled_linear_regression(X, Y, Z)
     sigs_pred = torch.from_numpy(lm.predict(X)).float().to(x_future.device)
     return sigs_pred
@@ -58,17 +58,16 @@ def sample_sig_fake(G, q, sig_config, x_past):
     batch_size, p, dim = x_past.shape
     x_past_mc = x_past.repeat(sig_config.mc_size, 1, 1).requires_grad_()                                                            # (batch_size * mc_size, p, dim)
     x_fake = G.sample(q, x_past_mc)                                                                                                 # (batch_size * mc_size, q, dim)
-    sigs_fake_future = sig_config.compute_sig_future(x_fake)                                                                        # (batch_size * mc_size, sig_future_dim) where sig_future_dim = dim + ... + dim**depth
+    sigs_fake_future = sig_config.compute_sig_future(x_fake)                                                                        # (batch_size * mc_size, sig_future_dim) where sig_future_dim = dim_aug + ... + dim_aug**depth
     
-    # cannot use this logic... need to keep grad 
     X = None
     Y = sigs_fake_future.reshape(sig_config.mc_size, -1)                                                                            # (mc_size, batch_size * sig_future_dim)
-    if isinstance(sig_config, SigCWGANConfig):
+    if type(sig_config) is SigCWGANConfig:
         Z = None
-    elif isinstance(sig_config, MSigCWGANConfig):
-        sigs_fake_future_control = sig_config.compute_sig_future_control(x_fake)                                                    # (batch_size * mc_size, sig_future_dim)
-        Z = sigs_fake_future_control.reshape(sig_config.mc_size, -1)                                                                # (mc_size, batch_size * sig_future_dim)
-    sigs_fake_ce = fit_controlled_linear_regression(X, Y, Z).predict(None).reshape(batch_size, -1).float()                          # (batch_size, sig_future_dim)
+    elif type(sig_config) is MSigCWGANConfig:
+        sigs_control_fake_future = sig_config.compute_sig_control_future(x_fake)                                                    # (batch_size * mc_size, sig_future_dim)
+        Z = sigs_control_fake_future.reshape(sig_config.mc_size, -1)                                                                # (mc_size, batch_size * sig_future_dim)
+    sigs_fake_ce = fit_controlled_linear_regression(X, Y, Z, parallel=True).predict(None).reshape(batch_size, -1).float()           # (batch_size, sig_future_dim)
     return sigs_fake_ce, x_fake
 
 

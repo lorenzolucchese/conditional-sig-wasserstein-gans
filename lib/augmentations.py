@@ -174,7 +174,7 @@ def augment_path_and_compute_signature_controls(x: torch.Tensor, config: Signatu
         # append 0-th order signature
         signatures_lower = torch.cat([torch.ones(batch, length - 1, 1), signatures_lower], dim=2)                           # shape: (batch, length - 1, 1 + channels + ... + channels**(depth-1))
         # integrate
-        corrections = torch.einsum('ijk,ijl->ikl', signatures_lower, y.diff(axis=1)).flatten(start_dim=1)                   # shape: (batch, channels + ... + channels**depth)
+        corrections = torch.einsum('ijk,ijl->ikl', signatures_lower, y[:, 1:, :] - y[:, :-1, :]).flatten(start_dim=1)       # shape: (batch, channels + ... + channels**depth)
         corrections[:, ~signature_control_indices] = 0.                                                                     # shape: (batch, channels + ... + channels**depth)
         return corrections
 
