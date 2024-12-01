@@ -133,7 +133,7 @@ class GAN(BaseAlgo):
     def step(self):
         for i in range(self.D_steps_per_G_step):
             # generate x_fake
-            indices = sample_indices(self.x_real.shape[0], self.batch_size)
+            indices = sample_indices(self.x_real.shape[0], self.batch_size, self.device)
             x_past = self.x_real[indices, :self.p].clone().to(self.device)
             with torch.no_grad():
                 if self.gan_algo == 'CWGAN':
@@ -150,7 +150,7 @@ class GAN(BaseAlgo):
                 if self.gan_algo in ['RCWGAN', 'CWGAN']:
                     self.training_loss['{}_reg'.format(self.gan_algo)].append(reg)
         # Generator step
-        indices = sample_indices(self.x_real.shape[0], self.batch_size)
+        indices = sample_indices(self.x_real.shape[0], self.batch_size, self.device)
         x_past = self.x_real[indices, :self.p].clone().to(self.device)
         x_fake = self.G.sample(self.q, x_past)
         x_fake_past = torch.cat([x_past, x_fake], dim=1)

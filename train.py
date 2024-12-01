@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
 
-from hyperparameters import SIGCWGAN_CONFIGS
+from hyperparameters import SIGCWGAN_CONFIGS, MSIGCWGAN_CONFIGS
 from lib import ALGOS
 from lib.algos.base import BaseConfig
 from lib.data import download_man_ahl_dataset, download_mit_ecg_dataset
@@ -16,14 +16,17 @@ from lib.plot import savefig, create_summary
 from lib.utils import pickle_it
 
 
-def get_algo_config(dataset, data_params):
+def get_algo_config(dataset, data_params, algo_id):
     """ Get the algorithms parameters. """
     key = dataset
     if dataset == 'VAR':
         key += str(data_params['dim'])
     elif dataset == 'STOCKS':
         key += '_' + '_'.join(data_params['assets'])
-    return SIGCWGAN_CONFIGS[key]
+    if algo_id == 'SigCWGAN':
+        return SIGCWGAN_CONFIGS[key]
+    elif algo_id == 'MSigCWGAN':
+        return MSIGCWGAN_CONFIGS[key]
 
 
 def set_seed(seed):
@@ -32,8 +35,8 @@ def set_seed(seed):
 
 
 def get_algo(algo_id, base_config, dataset, data_params, x_real):
-    if algo_id == 'SigCWGAN':
-        algo_config = get_algo_config(dataset, data_params)
+    if algo_id in ['SigCWGAN', 'MSigCWGAN']:
+        algo_config = get_algo_config(dataset, data_params, algo_id)
         algo = ALGOS[algo_id](x_real=x_real, config=algo_config, base_config=base_config)
     else:
         algo = ALGOS[algo_id](x_real=x_real, base_config=base_config)
@@ -114,7 +117,7 @@ def main(args):
         for algo_id in args.algos:
             for seed in range(args.initial_seed, args.initial_seed + args.num_seeds):
                 base_config = BaseConfig(
-                        device='cuda:{}'.format(args.device) if args.use_cuda and torch.cuda.is_available() else 'cpu',
+                    device='cuda:{}'.format(args.device) if args.use_cuda and torch.cuda.is_available() else 'cpu',
                     seed=seed,
                     batch_size=args.batch_size,
                     hidden_dims=args.hidden_dims,

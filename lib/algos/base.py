@@ -84,7 +84,7 @@ class BaseAlgo:
                 axes[0].plot(self.training_loss['{}_reg'.format(algo)], label='GP')
         elif algo == 'GMMN':
             axes[0].plot(self.training_loss['MMD'], label='MMD')
-        elif algo == 'SigCWGAN':
+        elif algo in ['SigCWGAN', 'MSigCWGAN']:
             loss = self.training_loss['loss']
             axes[0].plot(loss, label='Sig-$W_1$ loss')
             axes[0].set_yscale('log')

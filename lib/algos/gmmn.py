@@ -15,7 +15,7 @@ class GMMN(BaseAlgo):
         self.G_optimizer = torch.optim.Adam(self.G.parameters(), lr=1e-4, betas=(0, 0.9))
 
     def step(self):
-        indices = sample_indices(self.x_real.shape[0], self.batch_size)
+        indices = sample_indices(self.x_real.shape[0], self.batch_size, self.device)
         x_past = self.x_real[indices, :self.p].clone().to(self.device)
         x_fake = self.G.sample(self.q, x_past)
         x_fake_past = torch.cat([x_past, x_fake], dim=1)
